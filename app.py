@@ -24,7 +24,6 @@ def application(request):
         return Response('alive')
 
     with tempfile.NamedTemporaryFile(suffix='.zip') as source_file:
-        # First check if any files were uploaded
         source_file.write(request.files['file'].read())
 
         source_file.flush()
@@ -33,24 +32,17 @@ def application(request):
             with zipfile.ZipFile(source_file.name, 'r') as zip_ref:
                 zip_ref.extractall(tmpdirname)
 
-                # Evaluate argument to run with subprocess
                 args = ['pdfunite']
 
                 for file_name in zip_ref.namelist():
                     args += [tmpdirname + file_name]
 
-                # Add source file name and output file name
-                output_file = tmpdirname + '/output.pdf' #source_file.name
+                output_file = tmpdirname + '/output.pdf'
                 args += [output_file]
 
                 cmd = ' '.join(args)
 
-                # Execute the command using executor
-                print("Executing > " + cmd)
-
                 execute(cmd)
-                # g = file(path_to_bigfile) # or any generator
-                # return Response(g, direct_passthrough=True)
 
                 pdf_file = open(output_file)
 
